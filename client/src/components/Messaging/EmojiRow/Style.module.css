@@ -1,0 +1,15 @@
+.emojiRow {
+  font-size: 18px;
+  resize: none;
+  flex: 1;
+  border: 0;
+  height: 50px;
+  box-sizing: border-box;
+  outline: none;
+  padding: 5px 5px;
+  user-select: none;
+}
+
+.lightEmojiRow {
+  background: #f2f2f2;
+}

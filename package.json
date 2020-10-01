@@ -9,8 +9,9 @@
     "client": "cd client && npm start",
     "server": "cross-env NODE_ENV=development nodemon index",
     "test": "cross-env NODE_ENV=test jest",
-    "start": "npm run build && cross-env NODE_ENV=production node index",
-    "postinstall": "cd client && npm install"
+    "start": "cross-env NODE_ENV=production node index",
+    "postinstall": "cd client && npm install",
+    "docker_start": "cross-env NODE_ENV=production node index"
   },
   "author": "",
   "license": "ISC",
@@ -22,7 +23,7 @@
     "express": "^4.17.1",
     "form-data": "^3.0.0",
     "mongodb": "^3.5.9",
-    "node-fetch": "^2.6.0",
+    "node-fetch": "^2.6.1",
     "pubnub": "^4.28.2",
     "socket.io": "^2.3.0",
     "socket.io-client": "^2.3.0",

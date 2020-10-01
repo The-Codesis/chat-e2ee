@@ -5,12 +5,21 @@
 The project is still in **development** phase.
 
 Working prototype:  
-https://chat-e2ee.azurewebsites.net  
-https://chat-e2ee.herokuapp.com
+https://chat-e2ee.herokuapp.com  
+https://chate2ee.fun
 
 ---
 
-This app will allow two mutually agreed users to have a conversation in _end-to-end_ encrypted environment. The app itself doesn't track you or ask any infromation from you. Data is owned by **only you** and **only while chatting**. Your private key is generated on your device and never leaves your device. This is not a replacement of your usual chat application.
+This app will allow two mutually agreed users to have a chat in _end-to-end_ encrypted environment. The app itself doesn't track you or ask any infromation from you. Data is owned by **only you** and **only while chatting**. Your private key is generated on your device and never leaves your device. This is not a replacement of your usual chat application.
+
+## Features
+
+1. The end users **don't identify** themselves .
+2. Data is **not** stored on any remote server, encrypted data is just relayed to other users, the data can't be decrypted by any 3rd user.  
+3. Secure image sharing. [Read more](https://github.com/muke1908/chat-e2ee/wiki/Idea:-Secure-image-sharing)  
+   **IMPORTANT:** The image sharing feature is imcomplete!! Images are stored to [imagebb](https://mukesh-biswas.imgbb.com/) server. (27/08/2020)
+4. **No history** i.e. once chat is closed the data is not recoverable.
+5. **Zero** information sharing -- no login/signup.
 
 ---
 
@@ -30,20 +39,11 @@ For installation instruction, go to [developer section](https://github.com/muke1
 
 ---
 
-### Key Features
-
-1. The end users are not tracable.
-2. Data is not stored on any remote server.
-3. Secure image sharing. [Read more](https://github.com/muke1908/chat-e2ee/wiki/Secure-image-sharing)  
-   **IMPORTANT:** The image sharing feature is imcomplete!! Images are stored to [imagebb](https://mukesh-biswas.imgbb.com/) server. (27/08/2020)
-4. No saved history i.e. once chat is closed the data is not recoverable.
-5. It doesn't ask any information from you -- no login/signup.
-
 ### How to initiate chat
 
 1. Generate unique link.
 2. Share the link with the person you want to chat with.
-3. Both users identify themselves.
+3. Once key exchange is complete, start chatting.
 4. The messages are end-to-end encrypted hence, no one can decrypt your message other than you.
 
 **How the encryption works**
@@ -60,7 +60,7 @@ More detailed explanation: https://www.youtube.com/watch?v=GSIDS_lvRv4&t=1s
 
 ---
 
-### Proposed flow
+### Flow
 
 ![flow](https://i.imgur.com/2GrBQMz.jpg)
 
@@ -81,6 +81,9 @@ NOTE: by default `create-react-app` runs webpack-dev-server on port `3000`. The 
 
 **Important:** Check `.env.sample` to configure your `.env` file.
 
+To start with docker read the [instructions](https://github.com/muke1908/chat-e2ee/tree/master/docker).   
+For native build read the [instructions](https://github.com/muke1908/chat-e2ee/tree/master/native).
+
 ### Folder structure
 
 - The FE client is located in `./client` which is coupled with the backend
@@ -89,21 +92,14 @@ NOTE: by default `create-react-app` runs webpack-dev-server on port `3000`. The 
 - Entry point is `./index.js`
 
 ### APIs
+```endpoint: https://chate2ee.fun/api/<path>```
 
-| url                              | method   | paylod                         | filename                  | description                                   |
+| url                              | method   | payload                         | filename                  | description                                   |
 | -------------------------------- | -------- | ------------------------------ | ------------------------- | --------------------------------------------- |
-| `/api/chat-link`                 | `POST`   | `{token}`                      | `/api/index.js`           | to generate unique link to start chat session |
-| `/api/chat-link/status/:channel` | `GET`    |                                | `/api/index.js`           | to check if a channel is valid                |
-| `/api/chat/message`              | `POST`   | `{ channel, sender, message }` | `/api/messaging/index.js` | to send a message to a specific channel       |
-| `/api/chat-link/:channel`        | `DELETE` |                                | `/api/index.js`           | to delete a channel                           |
-
----
-
-**Messaging flow**:
-
-- Client encrypts message at client-side and sends via REST call.
-- Client receives message in realtime via websocket and decrypt locally at client side.
-- Your messages can not be recovered if you lose encryption keys.
+| `/chat-link`                 | `POST`   | `{token}`                      | `/api/index.js`           | to generate unique link to start chat session |
+| `/chat-link/status/:channel` | `GET`    |                                | `/api/index.js`           | to check if a channel is valid                |
+| `/chat/message`              | `POST`   | `{ channel, sender, message }` | `/api/messaging/index.js` | to send a message to a specific channel       |
+| `/chat-link/:channel`        | `DELETE` |                                | `/api/index.js`           | to delete a channel                           |
 
 ---
 
@@ -139,11 +135,25 @@ Example:
     <td align="center"><a href="https://github.com/nafees87n"><img src="https://avatars2.githubusercontent.com/u/56021937?v=4" width="80px;" alt=""/><br /><sub><b>Nafees Nehar</b></sub></a><br /><a href="https://github.com/muke1908/chat-e2ee/commits?author=nafees87n" title="Code">💻</a></td>
     <td align="center"><a href="http://twsprogramming.com"><img src="https://avatars0.githubusercontent.com/u/25822696?v=4" width="80px;" alt=""/><br /><sub><b>Tyler Skulley</b></sub></a><br /><a href="https://github.com/muke1908/chat-e2ee/commits?author=tskull01" title="Code">💻</a></td>
   </tr>
+  <tr>
+    <td align="center"><a href="https://github.com/drmartell"><img src="https://avatars3.githubusercontent.com/u/49651717?v=4" width="80px;" alt=""/><br /><sub><b>drmartell</b></sub></a><br /><a href="https://github.com/muke1908/chat-e2ee/commits?author=drmartell" title="Code">💻</a></td>
+    <td align="center"><a href="https://Narasimha1997.github.io"><img src="https://avatars2.githubusercontent.com/u/20423357?v=4" width="80px;" alt=""/><br /><sub><b>Narasimha Prasanna HN</b></sub></a><br /><a href="#infra-Narasimha1997" title="Infrastructure (Hosting, Build-Tools, etc)">🚇</a></td>
+    <td align="center"><a href="https://github.com/loneWarrior581"><img src="https://avatars2.githubusercontent.com/u/67538935?v=4" width="80px;" alt=""/><br /><sub><b>Uttkarsh singh</b></sub></a><br /><a href="https://github.com/muke1908/chat-e2ee/commits?author=loneWarrior581" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/Ryuuko"><img src="https://avatars2.githubusercontent.com/u/25223617?v=4" width="80px;" alt=""/><br /><sub><b>Tat Cheong Chu</b></sub></a><br /><a href="https://github.com/muke1908/chat-e2ee/commits?author=Ryuuko" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/salonigoyal2309"><img src="https://avatars3.githubusercontent.com/u/48411357?v=4" width="80px;" alt=""/><br /><sub><b>Saloni Goyal</b></sub></a><br /><a href="https://github.com/muke1908/chat-e2ee/commits?author=salonigoyal2309" title="Code">💻</a></td>
+    <td align="center"><a href="http://celestialco.wordpress.com"><img src="https://avatars2.githubusercontent.com/u/25225850?v=4" width="80px;" alt=""/><br /><sub><b>Abhishek Agarwal</b></sub></a><br /><a href="https://github.com/muke1908/chat-e2ee/commits?author=abhishek-aa" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/manny525"><img src="https://avatars1.githubusercontent.com/u/60325174?v=4" width="80px;" alt=""/><br /><sub><b>manny525</b></sub></a><br /><a href="https://github.com/muke1908/chat-e2ee/commits?author=manny525" title="Code">💻</a></td>
+  </tr>
 </table>
 
 <!-- markdownlint-enable -->
 <!-- prettier-ignore-end -->
-
 <!-- ALL-CONTRIBUTORS-LIST:END -->
 
 > This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!
+
+---
+**Cryptographic notice**  
+This distribution includes cryptographic software. The country in which you currently reside may have restrictions on the import, possession, use, and/or re-export to another country, of encryption software. BEFORE using any encryption software, please check your country's laws, regulations and policies concerning the import, possession, or use, and re-export of encryption software, to see if this is permitted. See http://www.wassenaar.org/ for more information.
+
+The U.S. Government Department of Commerce, Bureau of Industry and Security (BIS), has classified this software as Export Commodity Control Number (ECCN) 5D002.C.1, which includes information security software using or performing cryptographic functions with asymmetric algorithms. The form and manner of this distribution makes it eligible for export under the License Exception ENC Technology Software Unrestricted (TSU) exception (see the BIS Export Administration Regulations, Section 740.13) for both object code and source code.

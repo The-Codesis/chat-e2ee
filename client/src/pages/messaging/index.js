@@ -21,6 +21,7 @@ import { sendMessage, sharePublicKey, getPublicKey, getUsersInChannel } from '..
 import styles from './Style.module.css';
 import { Message, UserStatusInfo, NewMessageForm, ScrollWrapper } from '../../components/Messaging';
 import Notification from '../../components/Notification';
+import LinkSharingInstruction from '../../components/Messaging/LinkSharingInstruction';
 import notificationAudio from '../../components/Notification/audio.mp3';
 
 const Chat = () => {
@@ -30,6 +31,7 @@ const Chat = () => {
   const [previewImg, setPreviewImg] = useState(false);
   const [usersInChannel, setUsers] = useState([]);
   const [notificationState, setNotificationState] = useState(false);
+  const [deliveredID, setDeliveredID] = useState([]);
   const [darkMode] = useContext(ThemeContext);
 
   const myKeyRef = useRef(null);
@@ -38,6 +40,7 @@ const Chat = () => {
   const notificationTimer = useRef(null);
 
   const { channelID } = useParams();
+
   let userId = getUserSessionID(channelID);
 
   // if not in session, lets create one and store.
@@ -93,7 +96,10 @@ const Chat = () => {
         local: true
       })
     );
+    resetImageHandler();
+  };
 
+  const resetImageHandler = () => {
     setSelectedImg('');
     setPreviewImg(false);
     setText('');
@@ -107,9 +113,7 @@ const Chat = () => {
         alicePublicKey: publicKeyRef.current
       });
 
-      // TODO: need to handle image
-
-      await sendMessage({
+      const { id, timestamp } = await sendMessage({
         channelID,
         userId,
         image,
@@ -122,6 +126,8 @@ const Chat = () => {
       setMessages((prevMsg) => {
         const { ...message } = prevMsg[index];
         message.local = false;
+        message.id = id;
+        message.timestamp = timestamp;
         prevMsg[index] = message;
         return [...prevMsg];
       });
@@ -131,6 +137,7 @@ const Chat = () => {
 
   const getSetUsers = async (channelID) => {
     const usersInChannel = await getUsersInChannel({ channel: channelID });
+
     setUsers(usersInChannel);
     const alice = usersInChannel.find((user) => user.uuid !== userId);
 
@@ -144,25 +151,7 @@ const Chat = () => {
   };
 
   const initChat = async () => {
-    // TODO: handle error
-    // const messages = await fetchMessages(pubnub, channelID);
-    //
-    // const formatMessages = messages.map((msg) => {
-    //   const {
-    //     image,
-    //     sender,
-    //     body: { box, nonce }
-    //   } = msg;
-    //
-    //   return {
-    //     encrypted: true,
-    //     encryptionDetail: { box, nonce },
-    //     sender,
-    //     image,
-    //     body: btoa(strToTypedArr(box)) // let's just stringify the array, to decrypt later
-    //   };
-    // });
-    // setMessages(formatMessages);
+    // TODO: restore previous messages from local storage
   };
 
   useEffect(() => {
@@ -175,7 +164,18 @@ const Chat = () => {
       userID: userId,
       publicKey: typedArrayToStr(myKeyRef.current.publicKey)
     });
-
+    socket.on('limit-reached', () => {
+      setMessages((prevMsg) =>
+        prevMsg.concat({
+          image: '',
+          body: `Sorry, can't be used by more than two users. Check if the link is open on other tab`,
+          sender: ''
+        })
+      );
+    });
+    socket.on('delivered', (id) => {
+      setDeliveredID((prev) => [...prev, id]);
+    });
     // an event to notify that the other person is joined.
     socket.on('on-alice-join', ({ publicKey }) => {
       if (publicKey) {
@@ -193,25 +193,27 @@ const Chat = () => {
       getSetUsers(channelID);
     });
 
+    //handle incoming message
     socket.on('chat-message', (msg) => {
       try {
         const box = strToTypedArr(msg.message.box);
         const nonce = strToTypedArr(msg.message.nonce);
-
         const { msg: _msg } = decryptMsg({
           box,
           nonce,
           mySecretKey: myKeyRef.current.secretKey,
           alicePublicKey: publicKeyRef.current
         });
-
         setMessages((prevMsg) =>
           prevMsg.concat({
             image: msg.image,
             body: _msg,
-            sender: msg.sender
+            sender: msg.sender,
+            id: msg.id,
+            timestamp: msg.timestamp
           })
         );
+        socket.emit('received', { channel: msg.channel, sender: msg.sender, id: msg.id });
       } catch (err) {
         console.error(err);
       }
@@ -225,24 +227,35 @@ const Chat = () => {
   }, [channelID]);
 
   const alice = usersInChannel.find((u) => u.uuid !== userId);
-  const messagesFormatted = messages.map(({ body, sender, image, local }, i) => {
+  console.log(messages);
+  const messagesFormatted = messages.map(({ body, sender, image, local, id, timestamp }, i) => {
     return {
       owner: sender === userId,
       body,
       image,
-      local
+      local,
+      id,
+      timestamp
     };
   });
 
   return (
     <>
-      <UserStatusInfo online={alice} />
+      <UserStatusInfo online={alice} getSetUsers={getSetUsers} channelID={channelID} />
+
       <div className={styles.messageContainer}>
         <div className={`${styles.messageBlock} ${!darkMode && styles.lightModeContainer}`}>
           <ScrollWrapper messageCount={messagesFormatted.length}>
             {messagesFormatted.map((message, index) => (
-              <Message key={index} handleSend={handleSend} index={index} message={message} />
+              <Message
+                key={index}
+                handleSend={handleSend}
+                index={index}
+                message={message}
+                deliveredID={deliveredID}
+              />
             ))}
+            {!alice && <LinkSharingInstruction link={window.location.href} />}
           </ScrollWrapper>
         </div>
         <NewMessageForm
@@ -253,6 +266,7 @@ const Chat = () => {
           setSelectedImg={setSelectedImg}
           previewImg={previewImg}
           setPreviewImg={setPreviewImg}
+          resetImage={resetImageHandler}
         />
       </div>
       <Notification play={notificationState} audio={notificationAudio} />

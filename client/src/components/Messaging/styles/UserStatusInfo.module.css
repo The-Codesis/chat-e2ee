@@ -12,11 +12,8 @@
 @media screen and (max-width: 640px) {
   .userInfo {
     padding-left: 15px;
+    padding-right: 15px;
   }
-}
-
-.toggleIcon {
-  font-size: 24px;
 }
 
 .FiMoon {
@@ -25,4 +22,29 @@
 
 .FiSun {
   color: #4bb2f9;
+}
+
+.userOnlineWaiting {
+  display: flex;
+  align-items: center;
+}
+
+.retryImageIcon {
+  width: 20px;
+  height: auto;
+  margin-left: 5px;
+  cursor: pointer;
+}
+
+.loading {
+  animation: spin 5000ms linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(360deg);
+  }
+  to {
+    transform: rotate(0deg);
+  }
 }
